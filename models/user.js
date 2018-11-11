@@ -40,7 +40,7 @@ var UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    departmet:{
+    department:{
         type: String,
         required: true
     },
@@ -67,7 +67,7 @@ var UserSchema = new mongoose.Schema({
 UserSchema.methods.generateToken = function(){
     var user = this;
     var access = user.roleId;
-    var token =  jwt.sign({_id:user._id.toHexSting(),access},'abc123').toString();
+    var token =  jwt.sign({_id:user._id.toHexString(),access},'abc123').toString();
     console.log("1");
     user.tokens.push({access,token});
     return user.save().then(()=>{

@@ -13,7 +13,7 @@ var app = express();
 app.use(bodyParser.json());
 
 app.post('/singup', (req,res) =>{
-    var body = _.pick(req.body,['email','password','name','phone','studentID','departmet','lineId','roleId'])
+    var body = _.pick(req.body,['email','password','name','phone','studentID','department','lineId','roleId'])
     body.time = Date.now();
     var user = new User(body);
     user.save().then(()=>{
