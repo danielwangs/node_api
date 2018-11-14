@@ -4,7 +4,7 @@ const moment = require('moment-timezone');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
-const {ObjectID} = require('mongodb');
+const { ObjectID } = require('mongodb');
 
 var UserSchema = new mongoose.Schema({
     email:{
@@ -73,8 +73,52 @@ UserSchema.methods.generateToken = function(){
     return user.save().then(()=>{
         console.log("2");
         return token
-        console.log("3");
     })
+}
+
+UserSchema.statics.findByCredentials = function(email, password){
+    var User = this;
+
+    return User.findOne({email}).then(user =>{
+        if(!email){
+            return Promise.reject("This email is not found");
+        }
+        return new Promise((resolve, reject) => {
+            bcrypt.compare(password, user.password).then(res =>{
+                if(res){
+                    resolve(user)
+                }else{
+                    reject("wrong password");
+                }
+            })
+        })
+    })
+} 
+
+UserSchema.statics.findByToken = function(token){
+    var User = this;
+    var decoded ;
+    console.log(1);
+    try{
+        console.log(2);
+        decoded = jwt.verify(token, 'abc123')
+    }catch(e){
+        console.log(3);
+        return Promise.reject();
+    }
+    return User.findOne({
+        _id : decoded._id,
+        'tokens.token':token,
+        'tokens.access': decoded.access
+    })
+}
+
+
+
+UserSchema.methods.toJson = function(){
+    var user = this;
+    var userObj = user.toObject();
+    return _.pick(userObj,['_id','email','phone','studentId','department','roleId'])
 }
 
 UserSchema.pre('save', function(next){

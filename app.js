@@ -4,6 +4,8 @@ const moment = require('moment-timezone');
 const _ = require('lodash');
 const mongoose = require('mongoose');
 const  { User }  = require('./models/user.js');
+const {authenticate} = require('./middleware/authenticare.js');
+mongoose.Promise = global.Promise; //新版mongoose不用打
 
 mongoose.connect('mongodb://localhost/ratingsystem', {
     useMongoClient:true
@@ -27,6 +29,28 @@ app.post('/singup', (req,res) =>{
 })
 
 
+//登入
+app.post('/login',(req,res) =>{
+    var body = _.pick(req.body,['email','password']);
+    User.findByCredentials(body.email, body.password).then((user) =>{
+        return user.generateToken().then((token)=>{
+            res.header('authToken', token).send()
+        }).catch((e) =>{
+            res.status(403).send("Token error");
+        })
+    }).catch((e) =>{
+        res.ststus(403).send(e);
+    })
+})
+
+//Token驗證
+app.get('/ckeckme', authenticate, (req,res) =>{
+    var user = req.user;
+    var objUser = user.toJson();
+    console.log(objUser);
+    console.log(req.user);
+    res.send(objUser);
+})
 
 app.listen(3000, () => {
     console.log(moment().tz("Asia/Taipei").format());
