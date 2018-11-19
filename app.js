@@ -34,7 +34,7 @@ app.post('/login',(req,res) =>{
     var body = _.pick(req.body,['email','password']);
     User.findByCredentials(body.email, body.password).then((user) =>{
         return user.generateToken().then((token)=>{
-            res.header('authToken', token).send()
+            res.header('authToken', token).send();
         }).catch((e) =>{
             res.status(403).send("Token error");
         })
@@ -47,8 +47,17 @@ app.post('/login',(req,res) =>{
 app.get('/ckeckme', authenticate, (req,res) =>{
     var user = req.user;
     var objUser = user.toJson();
+    var roleId = user.roleId;
     console.log(objUser);
     console.log(req.user);
+   
+    // if(roleId === "teacher"){
+    //     resolve(user)
+    // }else{
+    //     reject("你不是老師喔!");
+    // }
+
+    console.log(roleId);
     res.send(objUser);
 })
 
